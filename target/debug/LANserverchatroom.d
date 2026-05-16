@@ -1,0 +1,1 @@
+/data/data/com.termux/files/home/scripts/Belajar_Pemerograman/Rust/LANserverchatroom/target/debug/LANserverchatroom: /data/data/com.termux/files/home/scripts/Belajar_Pemerograman/Rust/LANserverchatroom/src/main.rs
