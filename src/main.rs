@@ -27,9 +27,9 @@ async fn  main() {
         if let Ok((socket, _)) = listener.accept().await {
             let tx_clone = tx.clone();
             let rx_clone = tx.subscribe();
-            tokio::spawn(async move{
-                handle_users(socket, tx_clone, rx_clone)
-            }.await;);
+            let _ = tokio::spawn(async move{
+                handle_users(socket, tx_clone, rx_clone).await;
+            });
         }
     }
 }
@@ -69,15 +69,17 @@ async fn handle_users(socket: TcpStream, tx: SenderChannel, mut rx: ReceiverChan
                 }
             }
             result = rx.recv() => {
-                if let Ok(())
+                if let Ok((sender, txt)) = result {
+                    let formated = format_message(&sender, &username, &txt);
+                    if writer.write_all(formated.as_bytes()).await.is_err(){break;}
+                    let _ = writer.flush().await;
+                }
             }
         }
     }
-}
     // Proses Keluar
     println!("[Log] {} Keluar.", username);
     let _ = tx.send(("Server".to_string(), format!("{} meninggalkan obrolan.", username)));
-
 }
 
 fn format_message(sender: &str, username: &str, txt: &str) -> String{
