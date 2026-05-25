@@ -4,14 +4,14 @@ use tokio::sync::broadcast;
 use std::process;
 
 
-// Data custom biar nggak kepanjangan nulis di fungsin
+// type data custom biar nggak kepanjangan nulis di parameter fungsi
 type SenderChannel = broadcast::Sender<(String, String)>;
 type ReceiverChannel = broadcast::Receiver<(String, String)>;
 
 
 #[tokio::main]
 async fn  main() {
-    let listener = tokio::net::TcpListener:: bind("127.0.0.1:8080")
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:8080")
     .await
     .unwrap_or_else(|err|{
         println!("{}", err);
@@ -19,14 +19,13 @@ async fn  main() {
     });
     // Buat Channel Broadcast utama
     // 16 adalah panjang karakter pesan
-    let (tx, _) = broadcast::channel::<(String, String)>(16); 
+    let (tx, _) = broadcast::channel::<(String, String)>(16); //penerima akan di abaikan sementara karena sever belum punya user dan akan di ekstrak pakai .subscribe()
     println!("[Ok] Server Is Running...");
-    
     // Tugas main hanyalah menjadi pendengar
     loop {
         if let Ok((socket, _)) = listener.accept().await {
-            let tx_clone = tx.clone();
-            let rx_clone = tx.subscribe();
+            let tx_clone = tx.clone();// untuk menulis 
+            let rx_clone = tx.subscribe();// untuk menerima dan mengekstraknya
             let _ = tokio::spawn(async move{
                 handle_users(socket, tx_clone, rx_clone).await;
             });
@@ -63,7 +62,7 @@ async fn handle_users(socket: TcpStream, tx: SenderChannel, mut rx: ReceiverChan
                     Ok(0) => break,
                     Ok(_) => {
                         let _ = tx.send((username.clone(), msg.trim().to_string()));
-                        msg.clear(); 
+                        msg.clear();//membersihkan text agar tidak menumpuk di buffer secara ghaib
                     }
                     Err(_) => break,
                 }
